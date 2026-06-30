@@ -1,0 +1,28 @@
+### Register a new user
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "email": "test1@gmail.com",
+    "password": "123456"
+}
+
+### Login to retrieve Access Token
+# @name login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "email": "test1@gmail.com",
+    "password": "123456"
+}
+
+### Get validated user profile (use access token from login response)
+GET http://localhost:3000/auth/profile
+Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6IjhhYjU0MjAxLWQ5YTUtNDE2Zi04MTllLWFjNTg0Yzk4YmI3NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3JydWRtaHV0amVkdHB2dWdweGFtLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI4ZGE5ODU1MS0zMWU3LTQyNWEtOTBiZC02MmJkOTMyYWNjZDIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzgyNTM3MDk3LCJpYXQiOjE3ODI1MzM0OTcsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3QxQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjhkYTk4NTUxLTMxZTctNDI1YS05MGJkLTYyYmQ5MzJhY2NkMiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzgyNTMzNDk3fV0sInNlc3Npb25faWQiOiI4NzU5OGEwZi00ZmViLTQ1ZDQtYTM5OC0xYjY5N2VmMThiZmUiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.RVoQlHT6OAC7yMSw0GZKRq9PUVO5NlsiFMF1cAzMGRJCtHdpYvjByacWAOAf3v-zNVxhIhems1o_qrIoK1mbVQ
+Accept: application/json
+
+### Logout to revoke the session
+POST http://localhost:3000/auth/logout
+Authorization: Bearer {{login.data.session.access_token}}
+Accept: application/json
