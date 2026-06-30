@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { CreateProductsDto } from './dtos/create-products.dto';
 import { UpdateProductsDto } from './dtos/update-products.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('products')
 export class ProductsController {
@@ -26,11 +27,13 @@ export class ProductsController {
         return await this.productsService.create(product);
     }
 
+    @Public()
     @Get('findAll')
     public async getProducts() {
         return await this.productsService.findAll();
     }
 
+    @Public()
     @Get(':id')
     public async getProductById(@Param('id') id: string) {
         return await this.productsService.findById(id);
