@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, Query } from '@nestjs/common';
 import { ColorsService } from './colors.service';
 import { CreateColorsDto } from './dtos/create-colors.dto';
 import { UpdateColorsDto } from './dtos/update-colors.dto';
+import { GetColorsDto } from './dtos/get-colors.dto';
 import { DataSource } from 'typeorm';
 import { Public } from 'src/auth/decorators/public.decorator';
 
@@ -18,8 +19,8 @@ export class ColorsController {
     }
 
     @Get('findAll')
-    async findAll() {
-        return await this.colorsService.getAllColors();
+    async findAll(@Query() query: GetColorsDto) {
+        return await this.colorsService.getAllColors(query);
     }
 
     @Get(':id')

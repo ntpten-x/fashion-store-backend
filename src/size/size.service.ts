@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateSizeDto } from './dtos/create-size.dto';
 import { UpdateSizeDto } from './dtos/update-size.dto';
+import { GetSizeDto } from './dtos/get-size.dto';
 
 @Injectable()
 export class SizeService {
@@ -40,10 +41,21 @@ export class SizeService {
         return this.getSizeById(data.id);
     }
 
-    async getAllSizes() {
-        const { data, error } = await this.supabase.getClient()
+    async getAllSizes(query?: GetSizeDto) {
+        const page = query?.page;
+        const limit = query?.limit;
+
+        let supabaseQuery = this.supabase.getClient()
             .from('size')
-            .select('*, size_use_category(category(*))');
+            .select('*, size_use_category(category(*))', { count: 'exact' });
+
+        if (page !== undefined && limit !== undefined) {
+            const from = (page - 1) * limit;
+            const to = page * limit - 1;
+            supabaseQuery = supabaseQuery.range(from, to);
+        }
+
+        const { data, error, count } = await supabaseQuery;
 
         if (error) {
             throw new InternalServerErrorException(error.message);
@@ -54,6 +66,15 @@ export class SizeService {
                 sz.use = sz.size_use_category?.map((item: any) => item.category).filter(Boolean) || [];
                 delete sz.size_use_category;
             });
+        }
+
+        if (page !== undefined && limit !== undefined) {
+            return {
+                data,
+                total: count || 0,
+                page,
+                limit
+            };
         }
 
         return data;

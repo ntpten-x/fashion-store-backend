@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateProductsDto } from './dtos/create-products.dto';
 import { UpdateProductsDto } from './dtos/update-products.dto';
+import { GetProductsDto } from './dtos/get-products.dto';
 
 @Injectable()
 export class ProductsService {
@@ -41,15 +42,35 @@ export class ProductsService {
         };
     }
 
-    public async findAll() {
-        const { data, error } = await this.supabaseService.getClient()
+    public async findAll(query?: GetProductsDto) {
+        const page = query?.page;
+        const limit = query?.limit;
+        const isUse = query?.is_use;
+
+        let supabaseQuery = this.supabaseService.getClient()
             .from('products')
             .select(`
                 *,
                 category:category(category_name),
                 size:size(size_name),
                 products_colors_colors(colors(colors_name))
-            `);
+            `, { count: 'exact' });
+
+        if (isUse !== undefined) {
+            if (isUse) {
+                supabaseQuery = supabaseQuery.or('is_use.neq.false,is_use.is.null');
+            } else {
+                supabaseQuery = supabaseQuery.eq('is_use', false);
+            }
+        }
+
+        if (page !== undefined && limit !== undefined) {
+            const from = (page - 1) * limit;
+            const to = page * limit - 1;
+            supabaseQuery = supabaseQuery.range(from, to);
+        }
+
+        const { data, error, count } = await supabaseQuery;
 
         if (error) {
             throw new InternalServerErrorException(error.message);
@@ -65,6 +86,15 @@ export class ProductsService {
                 delete product.categoryId;
                 delete product.sizeId;
             });
+        }
+
+        if (page !== undefined && limit !== undefined) {
+            return {
+                data,
+                total: count || 0,
+                page,
+                limit
+            };
         }
 
         return data;

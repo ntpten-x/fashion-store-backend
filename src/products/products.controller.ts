@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductsDto } from './dtos/create-products.dto';
 import { UpdateProductsDto } from './dtos/update-products.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { GetProductsDto } from './dtos/get-products.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -29,8 +30,8 @@ export class ProductsController {
 
     @Public()
     @Get('findAll')
-    public async getProducts() {
-        return await this.productsService.findAll();
+    public async getProducts(@Query() query: GetProductsDto) {
+        return await this.productsService.findAll(query);
     }
 
     @Public()

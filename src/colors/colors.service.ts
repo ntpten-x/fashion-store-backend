@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateColorsDto } from './dtos/create-colors.dto';
 import { UpdateColorsDto } from './dtos/update-colors.dto';
+import { GetColorsDto } from './dtos/get-colors.dto';
 
 @Injectable()
 export class ColorsService {
@@ -40,10 +41,21 @@ export class ColorsService {
         return this.getColorById(data.id);
     }
 
-    async getAllColors() {
-        const { data, error } = await this.supabase.getClient()
+    async getAllColors(query?: GetColorsDto) {
+        const page = query?.page;
+        const limit = query?.limit;
+
+        let supabaseQuery = this.supabase.getClient()
             .from('colors')
-            .select('*, colors_use_category(category(*))');
+            .select('*, colors_use_category(category(*))', { count: 'exact' });
+
+        if (page !== undefined && limit !== undefined) {
+            const from = (page - 1) * limit;
+            const to = page * limit - 1;
+            supabaseQuery = supabaseQuery.range(from, to);
+        }
+
+        const { data, error, count } = await supabaseQuery;
 
         if (error) {
             throw new InternalServerErrorException(error.message);
@@ -54,6 +66,15 @@ export class ColorsService {
                 color.use = color.colors_use_category?.map((item: any) => item.category).filter(Boolean) || [];
                 delete color.colors_use_category;
             });
+        }
+
+        if (page !== undefined && limit !== undefined) {
+            return {
+                data,
+                total: count || 0,
+                page,
+                limit
+            };
         }
 
         return data;

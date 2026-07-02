@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, Query } from '@nestjs/common';
 import { SizeService } from './size.service';
 import { CreateSizeDto } from './dtos/create-size.dto';
 import { UpdateSizeDto } from './dtos/update-size.dto';
+import { GetSizeDto } from './dtos/get-size.dto';
 
 @Controller('size')
 export class SizeController {
@@ -13,8 +14,8 @@ export class SizeController {
     }
 
     @Get('findAll')
-    async findAll() {
-        return await this.sizeService.getAllSizes();
+    async findAll(@Query() query: GetSizeDto) {
+        return await this.sizeService.getAllSizes(query);
     }
 
     @Get(':id')
